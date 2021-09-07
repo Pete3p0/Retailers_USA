@@ -28,7 +28,7 @@ def get_table_download_link(df):
     b64 = base64.b64encode(val)
     return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download='+option+'_'+Year+str(Month)+Day+".xlsx"'>Download Excel file</a>' # decode b'abc' => abc
 
-st.title('Retailer Sales Reports (KD Foods)')
+st.title('Retailer Sales Reports - KD Foods')
 
 Date_End = st.date_input("Week ending: ")
 Date_Start = Date_End - dt.timedelta(days=6)
