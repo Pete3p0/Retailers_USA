@@ -47,10 +47,7 @@ Country_Dict = {'AO':'Angola', 'MW':'Malawi', 'MZ':'Mozambique', 'NG':'Nigeria',
 
 option = st.selectbox(
     'Please select a retailer:',
-    ('Please select','Ackermans','Bradlows/Russels','Builders','Checkers',
-    'Clicks', 'CNA', 'Cross_Trainer','Dealz', 'Decofurn','Dis-Chem','Dis-Chem-Pharmacies', 'Game', 'H&H','HiFi',
-    'Incredible-Connection','J.A.M.','Makro', 'Mr-Price-Sport', 'Musica','Ok-Furniture', 
-    'Outdoor-Warehouse','Pep-Africa','Pep-SA','PnP','Retailability', 'Sportsmans-Warehouse','Takealot','TFG','TFG_Cosmetics','TRU'))
+    ('Please select','Giant_Tiger'))
 st.write('You selected:', option)
 
 st.write("")
@@ -90,38 +87,28 @@ if data_file:
 
 
 # Ackermans
-if option == 'Ackermans':
-
-    if Date_End.month < 10:
-        Month = '0'+str(Date_End.month)
-    else:
-        Month = str(Date_End.month)
+if option == 'Giant_Tiger':
 
     Units_Sold = 'Sales: ' + Year + '/' + str(Month) + '/' + Day
     CSOH = 'CSOH: ' + Year + '/' + str(Month) + '/' + Day
 
-
-
     try:
         # Get retailers map
-        df_ackermans_retailers_map = df_map
-        df_ackermans_retailers_map = df_ackermans_retailers_map.rename(columns={'Style Code': 'SKU No.'})
-        df_ackermans_retailers_map_final = df_ackermans_retailers_map[['SKU No.','Product Description','SMD Product Code']]
+        df_gt_retailers_map = df_map
 
         # Get retailer data
-        df_ackermans_data = df_data
-        df_ackermans_data.columns = df_ackermans_data.iloc[6]
-        df_ackermans_data = df_ackermans_data.iloc[7:]
-        df_ackermans_data = df_ackermans_data[df_ackermans_data['Style Description'].notna()] 
-        
+        df_gt_data = df_data
+        df_gt_data.columns = df_gt_data.iloc[2]
+        df_gt_data = df_gt_data.iloc[3:]
+        df_gt_data = df_gt_data[df_gt_data['SKU'].notna()]
+                
         # Merge with retailer map
-        df_ackermans_data['SKU No.'] = df_ackermans_data['Style Code'].astype(int)
-        df_ackermans_merged = df_ackermans_data.merge(df_ackermans_retailers_map_final, how='left', on='SKU No.')
-
+        df_gt_data_merged = df_gt_data.merge(df_gt_retailers_map, how='left', on='SKU')
+        
         # Find missing data
-        missing_model_ackermans = df_ackermans_merged['SMD Product Code'].isnull()
-        df_ackermans_missing_model = df_ackermans_merged[missing_model_ackermans]
-        df_missing = df_ackermans_missing_model[['SKU No.','Style Description']]
+        missing_model_gt = df_gt_data_merged['SMD Code'].isnull()
+        df_gt_missing_model = df_gt_data_merged[missing_model_gt]
+        df_missing = df_gt_missing_model[['SKU','Style']]
         df_missing_unique = df_missing.drop_duplicates()
         st.write("The following products are missing the SMD code on the map: ")
         st.table(df_missing_unique)
@@ -133,66 +120,65 @@ if option == 'Ackermans':
         st.markdown("Column headings are **case sensitive.** Please make sure they are correct") 
 
         
-    try:
-        # Set date columns
-        df_ackermans_merged['Start Date'] = Date_End
+    # try:
+    # Set date columns
+    df_gt_data_merged['Start Date'] = Date_End
+    
+    # Total amount column
+    df_gt_data_merged = df_gt_data_merged.rename(columns={'LW Sales $':'Total Amt'})
+    
+    # Add retailer column and store column
+    df_gt_data_merged['Forecast Group'] = 'Giant Tiger'
+    df_gt_data_merged['Store Name'] = ''
+    df_gt_data_merged['Style'] = df_gt_data_merged['Style'].str.title() 
+    df_gt_data_merged['SOH Qty'] = df_gt_data_merged['STORE OH'] + df_gt_data_merged['OO'] + df_gt_data_merged['GTW Net Units']
+    
+    # Rename columns
+    df_gt_data_merged = df_gt_data_merged.rename(columns={'SKU': 'SKU No.'})
+    df_gt_data_merged = df_gt_data_merged.rename(columns={'LW Sales Units': 'Sales Qty'})
+    df_gt_data_merged = df_gt_data_merged.rename(columns={'SMD Code': 'Product Code'})
+    df_gt_data_merged = df_gt_data_merged.rename(columns={'SMD Description': 'Product Description'})
 
-        # Total amount column
-        # df_ackermans_merged[Units_Sold].fillna(0,inplace=True)
-        # .astype(int)
-        df_ackermans_merged[Units_Sold].fillna(0,inplace=True)
-        df_ackermans_merged['Total Amt'] = df_ackermans_merged[Units_Sold] * df_ackermans_merged['Current RSP']
+    # Don't change these headings. Rather change the ones above
+    final_df_gt = df_gt_data_merged[['Start Date','SKU No.', 'Product Code', 'Forecast Group','Store Name','SOH Qty','Sales Qty','Total Amt']]
+    final_df_gt_p = df_gt_data_merged[['Product Code','Product Description','Sales Qty','Total Amt']]
+    final_df_gt_s = df_gt_data_merged[['Store Name','Total Amt']]
 
-        # Add retailer column and store column
-        df_ackermans_merged['Forecast Group'] = 'Ackermans'
-        df_ackermans_merged['Store Name'] = ''
-        df_ackermans_merged['Style Description'] = df_ackermans_merged['Style Description'].str.title() 
+    # Show final df
+    total = final_df_gt['Total Amt'].sum()
+    total_units = final_df_gt['Sales Qty'].sum()
+    st.write('**The total sales for the week are:** $',"{:0,.2f}".format(total).replace(',', ' '))
+    st.write('**Number of units sold:** '"{:0,.0f}".format(total_units).replace(',', ' '))
+    st.write('')
+    st.write('**Top 10 products for the week:**')
+    grouped_df_pt = final_df_gt_p.groupby(["Product Description"]).agg({"Sales Qty":"sum", "Total Amt":"sum"}).sort_values("Total Amt", ascending=False)
+    grouped_df_final_pt = grouped_df_pt[['Sales Qty', 'Total Amt']].head(10)
+    st.table(grouped_df_final_pt.style.format({'Sales Qty':'{:,.0f}','Total Amt':'${:,.2f}'}))
+    st.write('')
+    st.write('**Top 10 stores for the week:**')
+    grouped_df_st = final_df_gt_s.groupby("Store Name").sum().sort_values("Total Amt", ascending=False)
+    grouped_df_final_st = grouped_df_st[['Total Amt']].head(10)
+    st.table(grouped_df_final_st.style.format('${0:,.2f}'))
+    st.write('')
+    st.write('**Bottom 10 products for the week:**')
+    grouped_df_pb = final_df_gt_p.groupby(["Product Description"]).agg({"Sales Qty":"sum", "Total Amt":"sum"}).sort_values("Total Amt", ascending=False)
+    grouped_df_final_pb = grouped_df_pb[['Sales Qty', 'Total Amt']].tail(10)
+    st.table(grouped_df_final_pb.style.format({'Sales Qty':'{:,.0f}','Total Amt':'${:,.2f}'}))
+    st.write('')
+    st.write('**Bottom 10 stores for the week:**')
+    grouped_df_sb = final_df_gt_s.groupby("Store Name").sum().sort_values("Total Amt", ascending=False)
+    grouped_df_final_sb = grouped_df_sb[['Total Amt']].tail(10)
+    st.table(grouped_df_final_sb.style.format('${0:,.2f}'))
 
-        # Rename columns
-        df_ackermans_merged = df_ackermans_merged.rename(columns={CSOH: 'SOH Qty'})
-        df_ackermans_merged = df_ackermans_merged.rename(columns={Units_Sold: 'Sales Qty'})
-        df_ackermans_merged = df_ackermans_merged.rename(columns={'SMD Product Code': 'Product Code'})
+    st.write('**Final Dataframe:**')
+    final_df_gt
 
-        # Don't change these headings. Rather change the ones above
-        final_df_ackermans = df_ackermans_merged[['Start Date','SKU No.', 'Product Code', 'Forecast Group','Store Name','SOH Qty','Sales Qty','Total Amt']]
-        final_df_ackermans_p = df_ackermans_merged[['Product Code','Product Description','Sales Qty','Total Amt']]
-        final_df_ackermans_s = df_ackermans_merged[['Store Name','Total Amt']]
+    # Output to .xlsx
+    st.write('Please ensure that no products are missing before downloading!')
+    st.markdown(get_table_download_link(final_df_gt), unsafe_allow_html=True)
 
-        # Show final df
-        total = final_df_ackermans['Total Amt'].sum()
-        total_units = final_df_ackermans['Sales Qty'].sum()
-        st.write('**The total sales for the week are:** R',"{:0,.2f}".format(total).replace(',', ' '))
-        st.write('**Number of units sold:** '"{:0,.0f}".format(total_units).replace(',', ' '))
-        st.write('')
-        st.write('**Top 10 products for the week:**')
-        grouped_df_pt = final_df_ackermans_p.groupby(["Product Description"]).agg({"Sales Qty":"sum", "Total Amt":"sum"}).sort_values("Total Amt", ascending=False)
-        grouped_df_final_pt = grouped_df_pt[['Sales Qty', 'Total Amt']].head(10)
-        st.table(grouped_df_final_pt.style.format({'Sales Qty':'{:,.0f}','Total Amt':'R{:,.2f}'}))
-        st.write('')
-        st.write('**Top 10 stores for the week:**')
-        grouped_df_st = final_df_ackermans_s.groupby("Store Name").sum().sort_values("Total Amt", ascending=False)
-        grouped_df_final_st = grouped_df_st[['Total Amt']].head(10)
-        st.table(grouped_df_final_st.style.format('R{0:,.2f}'))
-        st.write('')
-        st.write('**Bottom 10 products for the week:**')
-        grouped_df_pb = final_df_ackermans_p.groupby(["Product Description"]).agg({"Sales Qty":"sum", "Total Amt":"sum"}).sort_values("Total Amt", ascending=False)
-        grouped_df_final_pb = grouped_df_pb[['Sales Qty', 'Total Amt']].tail(10)
-        st.table(grouped_df_final_pb.style.format({'Sales Qty':'{:,.0f}','Total Amt':'R{:,.2f}'}))
-        st.write('')
-        st.write('**Bottom 10 stores for the week:**')
-        grouped_df_sb = final_df_ackermans_s.groupby("Store Name").sum().sort_values("Total Amt", ascending=False)
-        grouped_df_final_sb = grouped_df_sb[['Total Amt']].tail(10)
-        st.table(grouped_df_final_sb.style.format('R{0:,.2f}'))
-
-        st.write('**Final Dataframe:**')
-        final_df_ackermans
-
-        # Output to .xlsx
-        st.write('Please ensure that no products are missing before downloading!')
-        st.markdown(get_table_download_link(final_df_ackermans), unsafe_allow_html=True)
-
-    except:
-        st.write('Check data')
+    # except:
+    #     st.write('Check data')
 
 
 # Bradlows/Russels
