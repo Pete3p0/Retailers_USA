@@ -3,3 +3,4 @@ pandas==0.25.1
 streamlit==0.69.2
 xlrd==1.2.0
 XlsxWriter==1.2.1
+openpyxl==3.0.7
