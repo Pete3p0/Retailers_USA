@@ -86,7 +86,7 @@ if data_file:
 
 
 
-# Ackermans
+# Giant Tiger
 if option == 'Giant_Tiger':
 
     Units_Sold = 'Sales: ' + Year + '/' + str(Month) + '/' + Day
@@ -120,65 +120,65 @@ if option == 'Giant_Tiger':
         st.markdown("Column headings are **case sensitive.** Please make sure they are correct") 
 
         
-    # try:
-    # Set date columns
-    df_gt_data_merged['Start Date'] = Date_End
-    
-    # Total amount column
-    df_gt_data_merged = df_gt_data_merged.rename(columns={'LW Sales $':'Total Amt'})
-    
-    # Add retailer column and store column
-    df_gt_data_merged['Forecast Group'] = 'Giant Tiger'
-    df_gt_data_merged['Store Name'] = ''
-    df_gt_data_merged['Style'] = df_gt_data_merged['Style'].str.title() 
-    df_gt_data_merged['SOH Qty'] = df_gt_data_merged['STORE OH'] + df_gt_data_merged['OO'] + df_gt_data_merged['GTW Net Units']
-    
-    # Rename columns
-    df_gt_data_merged = df_gt_data_merged.rename(columns={'SKU': 'SKU No.'})
-    df_gt_data_merged = df_gt_data_merged.rename(columns={'LW Sales Units': 'Sales Qty'})
-    df_gt_data_merged = df_gt_data_merged.rename(columns={'SMD Code': 'Product Code'})
-    df_gt_data_merged = df_gt_data_merged.rename(columns={'SMD Description': 'Product Description'})
+    try:
+        # Set date columns
+        df_gt_data_merged['Start Date'] = Date_End
+        
+        # Total amount column
+        df_gt_data_merged = df_gt_data_merged.rename(columns={'LW Sales $':'Total Amt'})
+        
+        # Add retailer column and store column
+        df_gt_data_merged['Forecast Group'] = 'Giant Tiger'
+        df_gt_data_merged['Store Name'] = ''
+        df_gt_data_merged['Style'] = df_gt_data_merged['Style'].str.title() 
+        df_gt_data_merged['SOH Qty'] = df_gt_data_merged['STORE OH'] + df_gt_data_merged['OO'] + df_gt_data_merged['GTW Net Units']
+        
+        # Rename columns
+        df_gt_data_merged = df_gt_data_merged.rename(columns={'SKU': 'SKU No.'})
+        df_gt_data_merged = df_gt_data_merged.rename(columns={'LW Sales Units': 'Sales Qty'})
+        df_gt_data_merged = df_gt_data_merged.rename(columns={'SMD Code': 'Product Code'})
+        df_gt_data_merged = df_gt_data_merged.rename(columns={'SMD Description': 'Product Description'})
 
-    # Don't change these headings. Rather change the ones above
-    final_df_gt = df_gt_data_merged[['Start Date','SKU No.', 'Product Code', 'Forecast Group','Store Name','SOH Qty','Sales Qty','Total Amt']]
-    final_df_gt_p = df_gt_data_merged[['Product Code','Product Description','Sales Qty','Total Amt']]
-    final_df_gt_s = df_gt_data_merged[['Store Name','Total Amt']]
+        # Don't change these headings. Rather change the ones above
+        final_df_gt = df_gt_data_merged[['Start Date','SKU No.', 'Product Code', 'Forecast Group','Store Name','SOH Qty','Sales Qty','Total Amt']]
+        final_df_gt_p = df_gt_data_merged[['Product Code','Product Description','Sales Qty','Total Amt']]
+        final_df_gt_s = df_gt_data_merged[['Store Name','Total Amt']]
 
-    # Show final df
-    total = final_df_gt['Total Amt'].sum()
-    total_units = final_df_gt['Sales Qty'].sum()
-    st.write('**The total sales for the week are:** $',"{:0,.2f}".format(total).replace(',', ' '))
-    st.write('**Number of units sold:** '"{:0,.0f}".format(total_units).replace(',', ' '))
-    st.write('')
-    st.write('**Top 10 products for the week:**')
-    grouped_df_pt = final_df_gt_p.groupby(["Product Description"]).agg({"Sales Qty":"sum", "Total Amt":"sum"}).sort_values("Total Amt", ascending=False)
-    grouped_df_final_pt = grouped_df_pt[['Sales Qty', 'Total Amt']].head(10)
-    st.table(grouped_df_final_pt.style.format({'Sales Qty':'{:,.0f}','Total Amt':'${:,.2f}'}))
-    st.write('')
-    st.write('**Top 10 stores for the week:**')
-    grouped_df_st = final_df_gt_s.groupby("Store Name").sum().sort_values("Total Amt", ascending=False)
-    grouped_df_final_st = grouped_df_st[['Total Amt']].head(10)
-    st.table(grouped_df_final_st.style.format('${0:,.2f}'))
-    st.write('')
-    st.write('**Bottom 10 products for the week:**')
-    grouped_df_pb = final_df_gt_p.groupby(["Product Description"]).agg({"Sales Qty":"sum", "Total Amt":"sum"}).sort_values("Total Amt", ascending=False)
-    grouped_df_final_pb = grouped_df_pb[['Sales Qty', 'Total Amt']].tail(10)
-    st.table(grouped_df_final_pb.style.format({'Sales Qty':'{:,.0f}','Total Amt':'${:,.2f}'}))
-    st.write('')
-    st.write('**Bottom 10 stores for the week:**')
-    grouped_df_sb = final_df_gt_s.groupby("Store Name").sum().sort_values("Total Amt", ascending=False)
-    grouped_df_final_sb = grouped_df_sb[['Total Amt']].tail(10)
-    st.table(grouped_df_final_sb.style.format('${0:,.2f}'))
+        # Show final df
+        total = final_df_gt['Total Amt'].sum()
+        total_units = final_df_gt['Sales Qty'].sum()
+        st.write('**The total sales for the week are:** $',"{:0,.2f}".format(total).replace(',', ' '))
+        st.write('**Number of units sold:** '"{:0,.0f}".format(total_units).replace(',', ' '))
+        st.write('')
+        st.write('**Top 10 products for the week:**')
+        grouped_df_pt = final_df_gt_p.groupby(["Product Description"]).agg({"Sales Qty":"sum", "Total Amt":"sum"}).sort_values("Total Amt", ascending=False)
+        grouped_df_final_pt = grouped_df_pt[['Sales Qty', 'Total Amt']].head(10)
+        st.table(grouped_df_final_pt.style.format({'Sales Qty':'{:,.0f}','Total Amt':'${:,.2f}'}))
+        st.write('')
+        st.write('**Top 10 stores for the week:**')
+        grouped_df_st = final_df_gt_s.groupby("Store Name").sum().sort_values("Total Amt", ascending=False)
+        grouped_df_final_st = grouped_df_st[['Total Amt']].head(10)
+        st.table(grouped_df_final_st.style.format('${0:,.2f}'))
+        st.write('')
+        st.write('**Bottom 10 products for the week:**')
+        grouped_df_pb = final_df_gt_p.groupby(["Product Description"]).agg({"Sales Qty":"sum", "Total Amt":"sum"}).sort_values("Total Amt", ascending=False)
+        grouped_df_final_pb = grouped_df_pb[['Sales Qty', 'Total Amt']].tail(10)
+        st.table(grouped_df_final_pb.style.format({'Sales Qty':'{:,.0f}','Total Amt':'${:,.2f}'}))
+        st.write('')
+        st.write('**Bottom 10 stores for the week:**')
+        grouped_df_sb = final_df_gt_s.groupby("Store Name").sum().sort_values("Total Amt", ascending=False)
+        grouped_df_final_sb = grouped_df_sb[['Total Amt']].tail(10)
+        st.table(grouped_df_final_sb.style.format('${0:,.2f}'))
 
-    st.write('**Final Dataframe:**')
-    final_df_gt
+        st.write('**Final Dataframe:**')
+        final_df_gt
 
-    # Output to .xlsx
-    st.write('Please ensure that no products are missing before downloading!')
-    st.markdown(get_table_download_link(final_df_gt), unsafe_allow_html=True)
+        # Output to .xlsx
+        st.write('Please ensure that no products are missing before downloading!')
+        st.markdown(get_table_download_link(final_df_gt), unsafe_allow_html=True)
 
-    # except:
-    #     st.write('Check data')
+    except:
+        st.write('Check data')
 
 
 # Bradlows/Russels
