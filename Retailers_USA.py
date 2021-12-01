@@ -87,7 +87,7 @@ if data_file:
 if option == 'FYE':
 
     try:
-        # Get retailers map
+    # Get retailers map
         df_fye_retailers_map = df_map
         df_fye_retailers_map = df_fye_retailers_map.rename(columns={'FYE UPC':'UPC'})
         
@@ -98,7 +98,7 @@ if option == 'FYE':
         df_fye_data_merged = df_fye_data.merge(df_fye_retailers_map, how='left', on='UPC')
         
         # Find missing data
-        missing_model_fye = df_fye_data_merged['SMD SKU'].isnull()
+        missing_model_fye = df_fye_data_merged['SMD code'].isnull()
         df_fye_missing_model = df_fye_data_merged[missing_model_fye]
         df_missing = df_fye_missing_model[['UPC','Item Description']]
         df_missing_unique = df_missing.drop_duplicates()
@@ -117,7 +117,7 @@ if option == 'FYE':
         df_fye_data_merged['Start Date'] = Date_End
         
         # Total amount column
-        df_fye_data_merged['Total Amt'] = df_fye_data_merged['Unit Sales'] * df_fye_data_merged['RSP']
+        df_fye_data_merged['Total Amt'] = df_fye_data_merged['Unit Sales'] * df_fye_data_merged['MSRP']
         
         # Add retailer column and store column
         df_fye_data_merged['Forecast Group'] = 'FYE'
@@ -127,7 +127,7 @@ if option == 'FYE':
         # Rename columns
         df_fye_data_merged = df_fye_data_merged.rename(columns={'UPC': 'SKU No.'})
         df_fye_data_merged = df_fye_data_merged.rename(columns={'Unit Sales': 'Sales Qty'})
-        df_fye_data_merged = df_fye_data_merged.rename(columns={'SMD SKU': 'Product Code'})
+        df_fye_data_merged = df_fye_data_merged.rename(columns={'SMD code': 'Product Code'})
         df_fye_data_merged = df_fye_data_merged.rename(columns={'SMD Desc': 'Product Description'})
 
         # Don't change these headings. Rather change the ones above
